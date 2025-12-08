@@ -17,32 +17,35 @@ int main() {
         fptr = fopen("list.txt", "wb");
     }
 
-    printf("What do you want to do?\n");
-    printf("1. Add a to-do task\n");
-    printf("2. Read the to-do list \n");
-    printf("3. Remove a task \n");
-    printf("4. Exit\n");
+    while (1) {
+        printf("What do you want to do?\n");
+        printf("1. Add a to-do task\n");
+        printf("2. Read the to-do list \n");
+        printf("3. Remove a task \n");
+        printf("4. Exit\n");
 
-    option = input_val();
+        option = input_val();
 
-    switch (option) {
-    case 1:
-        add_task(fptr);
-        break;
+        switch (option) {
+        case 1:
+            add_task(fptr);
+            break;
 
-    case 2:
-        printf("Displaying the to-do list \n");
-        display_todo_list(fptr);
-        break;
-    case 3:
-        delete_task();
-        break;  
-    case 4:
-        printf("Exiting program.\n");
-        break;
+        case 2:
+            printf("Displaying the to-do list \n");
+            rewind(fptr);
+            display_todo_list(fptr);
+            break;
+        case 3:
+            delete_task();
+            break;  
+        case 4:
+            printf("Exiting program.\n");
+            break;
+            return 0;
+    }       
     }
-
-    return 0;
+    
 }
 
 int input_val() {
