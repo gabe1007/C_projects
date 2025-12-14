@@ -11,10 +11,10 @@ int main() {
 
     int option = 0;
 
-    FILE *fptr = fopen("list.txt", "rb+");
+    FILE *fptr = fopen("list.txt", "r+");
     if(fptr == NULL) //if file does not exist, create it
     {
-        fptr = fopen("list.txt", "wb");
+        fptr = fopen("list.txt", "w+");
     }
 
     while (1) {
@@ -37,11 +37,16 @@ int main() {
             display_todo_list(fptr);
             break;
         case 3:
+            fclose(fptr);
             delete_task();
+            fptr = fopen("list.txt", "r+");
+            if (fptr == NULL) {
+                fptr = fopen("list.txt", "w+");
+            }
             break;  
         case 4:
             printf("Exiting program.\n");
-            break;
+            fclose(fptr);
             return 0;
     }       
     }
@@ -95,6 +100,7 @@ void add_task(FILE *fptr) {
 
     fseek(fptr, 0, SEEK_END);
     fprintf(fptr, "%s\n", task);
+    fflush(fptr);
     printf("Task added!\n");
 }
 
