@@ -55,172 +55,371 @@ int main() {
             char temp_name[256];
             char name[50];
 
-            
             switch (option) {
 
                 case 1:
-                add_contact(&contact1);
+                    add_contact(&contact1);
                 break;
 
                 case 2:
-                printf("Type the name of the contact: \n");
-                fgets(name, sizeof(name), stdin);
-                name[strcspn(name, "\n")] = '\0';
+                    printf("Type the name of the contact: \n");
+                    fgets(name, sizeof(name), stdin);
+                    name[strcspn(name, "\n")] = '\0';
 
-                rewinddir(d);
-                while ((f = readdir(d))) {
-                    // Skip . and .. directories
-                    if (strcmp(f->d_name, ".") == 0 || strcmp(f->d_name, "..") == 0) {
-                        continue;
-                    }
+                    rewinddir(d);
+                    while ((f = readdir(d))) {
+                        // Skip . and .. directories
+                        if (strcmp(f->d_name, ".") == 0 || strcmp(f->d_name, "..") == 0) {
+                            continue;
+                        }
 
-                    // buffer to not modify f->d_name
-                    strcpy(temp_name, f->d_name);
-                    
-                    for (int i = 0; temp_name[i] != '\0'; i++) {
-                        if (temp_name[i] == '_') {
-                            temp_name[i] = ' ';
+                        // buffer to not modify f->d_name
+                        strcpy(temp_name, f->d_name);
+                        
+                        for (int i = 0; temp_name[i] != '\0'; i++) {
+                            if (temp_name[i] == '_') {
+                                temp_name[i] = ' ';
+                            }
+                        }
+
+                        char *ext = strrchr(temp_name, '.'); // pointer to a string that starts at the "." so ext=".txt"
+                        if (ext && strcmp(ext, ".txt") == 0) {
+                            *ext = '\0';
+                        }
+
+                        if (strcmp(temp_name, name) == 0) {
+                            printf("Contact found: %s\n", name);
+
+                            sprintf(filepath, "database/%s", f->d_name);
+                        
+                            FILE *fptr = NULL;
+                            open_file(&fptr, filepath);
+
+                            // Read and display the file contents
+                            display_todo_list(fptr);
+
+                            fclose(fptr);
+                            
+                            found = 1;
+                            break;
                         }
                     }
 
-                    char *ext = strrchr(temp_name, '.'); // pointer to a string that starts at the "." so ext=".txt"
-                    if (ext && strcmp(ext, ".txt") == 0) {
-                        *ext = '\0';
+                    if (!found) {
+                        printf("Contact not found: %s\n", name);
                     }
-
-                    if (strcmp(temp_name, name) == 0) {
-                        printf("Contact found: %s\n", name);
-
-                        sprintf(filepath, "database/%s", f->d_name);
-                    
-                        FILE *fptr = NULL;
-                        open_file(&fptr, filepath);
-
-                        // Read and display the file contents
-                        display_todo_list(fptr);
-
-                        fclose(fptr);
-                        
-                        found = 1;
-                        break;
-                    }
-                }
-
-                if (!found) {
-                    printf("Contact not found: %s\n", name);
-                }
 
                 break;
 
                 case 3:
-                printf("Type the name of the contact to be edited: \n");
-                fgets(name, sizeof(name), stdin);
-                name[strcspn(name, "\n")] = '\0';
+                    printf("Type the name of the contact to be edited: \n");
+                    fgets(name, sizeof(name), stdin);
+                    name[strcspn(name, "\n")] = '\0';
 
-                rewinddir(d);
-                while ((f = readdir(d))) {
-                    // Skip . and .. directories
-                    if (strcmp(f->d_name, ".") == 0 || strcmp(f->d_name, "..") == 0) {
-                        continue;
-                    }
+                    rewinddir(d);
+                    while ((f = readdir(d))) {
+                        // Skip . and .. directories
+                        if (strcmp(f->d_name, ".") == 0 || strcmp(f->d_name, "..") == 0) {
+                            continue;
+                        }
 
-                    // buffer to not modify f->d_name
-                    strcpy(temp_name, f->d_name);
-                    
-                    for (int i = 0; temp_name[i] != '\0'; i++) {
-                        if (temp_name[i] == '_') {
-                            temp_name[i] = ' ';
+                        // buffer to not modify f->d_name
+                        strcpy(temp_name, f->d_name);
+                        
+                        for (int i = 0; temp_name[i] != '\0'; i++) {
+                            if (temp_name[i] == '_') {
+                                temp_name[i] = ' ';
+                            }
+                        }
+
+                        char *ext = strrchr(temp_name, '.'); // pointer to a string that starts at the "." so ext=".txt"
+                        if (ext && strcmp(ext, ".txt") == 0) {
+                            *ext = '\0';
+                        }
+
+                        if (strcmp(temp_name, name) == 0) {
+                            printf("Contact found: %s\n", name);
+                            snprintf(filepath, sizeof(filepath), "database/%s", f->d_name);
+
+                            printf("What do you want to edit:\n");
+                            printf("1. Name\n");
+                            printf("2. Phone\n");
+                            printf("3. Email\n");
+                            printf("4. Age\n");
+
+                            while (1) {
+                                if (scanf("%d", &choose_edit) != 1) {
+                                    printf("Invalid input. Please enter a number.\n");
+                                    while (getchar() != '\n'); // clear invalid
+                                    continue;
+                                }
+                                while (getchar() != '\n'); // consume newline
+
+                                if (choose_edit < 1 || choose_edit > 4) {
+                                    printf("Only choose 1, 2, 3 or 4.\n");
+                                    continue;
+                                }
+                                break;
+                            }
+
+                            char new_name[50];
+                            char new_phone[50];
+                            char new_email[50];
+                            char new_age[50];
+                            char new_filename[300];
+                            FILE *orig, *temp;
+                            char line[200];
+
+                            switch (choose_edit){
+                                case 1:
+                                    printf("Type the new name: ");
+                                    fgets(new_name, sizeof(new_name), stdin);
+                                    new_name[strcspn(new_name, "\n")] = '\0';
+
+                                    orig = fopen(filepath, "r");
+                                    if (!orig) {
+                                        perror("Failed to open original file");
+                                        break;
+                                    }
+
+                                    // Open temp file for writing 
+                                    temp = fopen("database/temp.txt", "w");
+                                    if (!temp) {
+                                        perror("Failed to create temp file");
+                                        fclose(orig);
+                                        break;
+                                    }
+
+                                    // Copy contents, replacing Name line
+                                    while (fgets(line, sizeof(line), orig)) {
+                                        if (strncmp(line, "Name:", strlen("Name:")) == 0) {
+                                            fprintf(temp, "Name: %s\n", new_name);
+                                        } else {
+                                            fputs(line, temp);
+                                        }
+                                    }
+
+                                    fclose(orig);
+                                    fclose(temp);
+
+                                    // Remove old file
+                                    if (remove(filepath) != 0) {
+                                        perror("Failed to remove old file");
+                                        break;
+                                    }
+
+                                    // Build new filename
+                                    snprintf(new_filename, sizeof(new_filename), "database/%s.txt", new_name);
+
+                                    // Replace spaces with underscores
+                                    for (int i = 0; new_filename[i]; i++) {
+                                        if (new_filename[i] == ' ')
+                                            new_filename[i] = '_';
+                                    }
+
+                                    // Rename temp file
+                                    if (rename("database/temp.txt", new_filename) != 0) {
+                                        perror("Failed to rename temp file");
+                                        break;
+                                    }
+
+                                    printf("Contact name updated successfully!\n");
+
+                                break;
+                                
+                                case 2:
+                                    printf("Type the new phone: ");
+                                    fgets(new_phone, sizeof(new_phone), stdin);
+                                    new_phone[strcspn(new_phone, "\n")] = '\0';
+
+                                    orig = fopen(filepath, "r");
+                                    if (!orig) {
+                                        perror("Failed to open original file");
+                                        break;
+                                    }
+
+                                    // Open temp file for writing 
+                                    temp = fopen("database/temp.txt", "w");
+                                    if (!temp) {
+                                        perror("Failed to create temp file");
+                                        fclose(orig);
+                                        break;
+                                    }
+
+                                    // Copy contents, replacing Phone line
+                                    while (fgets(line, sizeof(line), orig)) {
+                                        if (strncmp(line, "Phone:", strlen("Phone:")) == 0) {
+                                            fprintf(temp, "Phone: %s\n", new_phone);
+                                        } else {
+                                            fputs(line, temp);
+                                        }
+                                    }
+
+                                    fclose(orig);
+                                    fclose(temp);
+
+                                    if (remove(filepath) != 0) {
+                                        perror("Failed to remove old file");
+                                        break;
+                                    }
+
+                                    if (rename("database/temp.txt", filepath) != 0) {
+                                        perror("Failed to rename temp file");
+                                        break;
+                                    }
+
+                                    printf("Contact phone updated successfully!\n");
+                                break;
+
+                                case 3:
+                                    printf("Type the new email: ");
+                                    fgets(new_email, sizeof(new_email), stdin);
+                                    new_email[strcspn(new_email, "\n")] = '\0';
+
+                                    orig = fopen(filepath, "r");
+                                    if (!orig) {
+                                        perror("Failed to open original file");
+                                        break;
+                                    }
+
+                                    // Open temp file for writing 
+                                    temp = fopen("database/temp.txt", "w");
+                                    if (!temp) {
+                                        perror("Failed to create temp file");
+                                        fclose(orig);
+                                        break;
+                                    }
+
+                                    // Copy contents, replacing Phone line
+                                    while (fgets(line, sizeof(line), orig)) {
+                                        if (strncmp(line, "Email:", strlen("Email:")) == 0) {
+                                            fprintf(temp, "Email: %s\n", new_email);
+                                        } else {
+                                            fputs(line, temp);
+                                        }
+                                    }
+
+                                    fclose(orig);
+                                    fclose(temp);
+
+                                    if (remove(filepath) != 0) {
+                                        perror("Failed to remove old file");
+                                        break;
+                                    }
+
+                                    if (rename("database/temp.txt", filepath) != 0) {
+                                        perror("Failed to rename temp file");
+                                        break;
+                                    }
+
+                                    printf("Contact email updated successfully!\n");
+                                    
+                                break;
+                                case 4:
+                                    printf("Type the new age: ");
+                                    fgets(new_age, sizeof(new_age), stdin);
+                                    new_age[strcspn(new_age, "\n")] = '\0';
+
+                                    orig = fopen(filepath, "r");
+                                    if (!orig) {
+                                        perror("Failed to open original file");
+                                        break;
+                                    }
+
+                                    // Open temp file for writing 
+                                    temp = fopen("database/temp.txt", "w");
+                                    if (!temp) {
+                                        perror("Failed to create temp file");
+                                        fclose(orig);
+                                        break;
+                                    }
+
+                                    // Copy contents, replacing Phone line
+                                    while (fgets(line, sizeof(line), orig)) {
+                                        if (strncmp(line, "Age:", strlen("Age:")) == 0) {
+                                            fprintf(temp, "Age: %s\n", new_age);
+                                        } else {
+                                            fputs(line, temp);
+                                        }
+                                    }
+
+                                    fclose(orig);
+                                    fclose(temp);
+
+                                    if (remove(filepath) != 0) {
+                                        perror("Failed to remove old file");
+                                        break;
+                                    }
+
+                                    if (rename("database/temp.txt", filepath) != 0) {
+                                        perror("Failed to rename temp file");
+                                        break;
+                                    }
+
+                                    printf("Contact age updated successfully!\n");
+                                break;
+                            }
+                            found = 1;
                         }
                     }
 
-                    char *ext = strrchr(temp_name, '.'); // pointer to a string that starts at the "." so ext=".txt"
-                    if (ext && strcmp(ext, ".txt") == 0) {
-                        *ext = '\0';
-                    }
-
-                    if (strcmp(temp_name, name) == 0) {
-                        printf("Contact found: %s\n", name);
-                        snprintf(filepath, sizeof(filepath), "database/%s", f->d_name);
-
-                        printf("What do you want to edit:\n");
-                        printf("1. Name\n");
-                        printf("2. Phone\n");
-                        printf("3. Email\n");
-                        printf("4. Age\n");
-
-                        while (1) {
-                            if (scanf("%d", &choose_edit) != 1) {
-                                printf("Invalid input. Please enter a number.\n");
-                                while (getchar() != '\n'); // clear invalid
-                                continue;
-                            }
-                            while (getchar() != '\n'); // consume newline
-
-                            if (choose_edit < 1 || choose_edit > 4) {
-                                printf("Only choose 1, 2, 3 or 4.\n");
-                                continue;
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                if (!found) {
-                    printf("Contact not found: %s\n", name);
-                }                
+                    if (!found) {
+                        printf("Contact not found: %s\n", name);
+                    }                
                 
                 break;
 
                 case 4:
 
-                printf("Type the name of the contact to be deleted: \n");
-                fgets(name, sizeof(name), stdin);
-                name[strcspn(name, "\n")] = '\0'; 
-                rewinddir(d);
-                while ((f = readdir(d))) {
-                    // Skip . and .. directories
-                    if (strcmp(f->d_name, ".") == 0 || strcmp(f->d_name, "..") == 0) {
-                        continue;
-                    }
+                    printf("Type the name of the contact to be deleted: \n");
+                    fgets(name, sizeof(name), stdin);
+                    name[strcspn(name, "\n")] = '\0';
+                    rewinddir(d);
 
-                    // buffer to not modify f->d_name
-                    strcpy(temp_name, f->d_name);
-                    
-                    for (int i = 0; temp_name[i] != '\0'; i++) {
-                        if (temp_name[i] == '_') {
-                            temp_name[i] = ' ';
+                    while ((f = readdir(d))) {
+                        // Skip . and .. directories
+                        if (strcmp(f->d_name, ".") == 0 || strcmp(f->d_name, "..") == 0) {
+                            continue;
+                        }
+
+                        // buffer to not modify f->d_name
+                        strcpy(temp_name, f->d_name);
+                        
+                        for (int i = 0; temp_name[i] != '\0'; i++) {
+                            if (temp_name[i] == '_') {
+                                temp_name[i] = ' ';
+                            }
+                        }
+
+                        char *ext = strrchr(temp_name, '.'); // pointer to a string that starts at the "." so ext=".txt"
+                        if (ext && strcmp(ext, ".txt") == 0) {
+                            *ext = '\0';
+                        }
+
+                        if (strcmp(temp_name, name) == 0) {
+                            printf("Contact found: %s\n", name);
+                            snprintf(filepath, sizeof(filepath), "database/%s", f->d_name);
+
+                            if (remove(filepath) == 0) {
+                                printf("Deleted contact file: %s\n", name);
+                                found = 1;
+                            } else {
+                                perror("Failed to delete contact file");
+                            }
+
+                            break;
                         }
                     }
 
-                    char *ext = strrchr(temp_name, '.'); // pointer to a string that starts at the "." so ext=".txt"
-                    if (ext && strcmp(ext, ".txt") == 0) {
-                        *ext = '\0';
-                    }
-
-                    if (strcmp(temp_name, name) == 0) {
-                        printf("Contact found: %s\n", name);
-                        snprintf(filepath, sizeof(filepath), "database/%s", f->d_name);
-
-                        if (remove(filepath) == 0) {
-                            printf("Deleted contact file: %s\n", name);
-                            found = 1;
-                        } else {
-                            perror("Failed to delete contact file");
-                        }
-
-                        break;
-                    } 
-                }
-
-                if (!found) {
-                    printf("Contact not found: %s\n", name);
-                }                
+                    if (!found) {
+                        printf("Contact not found: %s\n", name);
+                    }                
 
                 break;
 
                 case 5:
-                printf("Exiting program.\n");
-                closedir(d);
+                    printf("Exiting program.\n");
+                    closedir(d);
                 return 0;
             }
         }
@@ -282,7 +481,7 @@ void display_todo_list(FILE *fptr) {
     char line[100];
 
     if (fptr == NULL) {
-        printf("Error opening file.\n");
+        perror("Error opening file.\n");
         return;
     }
 
