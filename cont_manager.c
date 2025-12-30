@@ -28,6 +28,7 @@ int main() {
 
     while (1) {
         int option;
+
         printf("Select an option:\n");
         printf("1. Add a contact\n");
         printf("2. Display a contact\n");
@@ -48,10 +49,12 @@ int main() {
         } else {
             while (getchar() != '\n');
 
+            int choose_edit;
             int found = 0;
             char filepath[300];
             char temp_name[256];
             char name[50];
+
             
             switch (option) {
 
@@ -139,10 +142,27 @@ int main() {
                         printf("Contact found: %s\n", name);
                         snprintf(filepath, sizeof(filepath), "database/%s", f->d_name);
 
-                        found = 1;
+                        printf("What do you want to edit:\n");
+                        printf("1. Name\n");
+                        printf("2. Phone\n");
+                        printf("3. Email\n");
+                        printf("4. Age\n");
 
-                        break;
-                    } 
+                        while (1) {
+                            if (scanf("%d", &choose_edit) != 1) {
+                                printf("Invalid input. Please enter a number.\n");
+                                while (getchar() != '\n'); // clear invalid
+                                continue;
+                            }
+                            while (getchar() != '\n'); // consume newline
+
+                            if (choose_edit < 1 || choose_edit > 4) {
+                                printf("Only choose 1, 2, 3 or 4.\n");
+                                continue;
+                            }
+                            break;
+                        }
+                    }
                 }
 
                 if (!found) {
