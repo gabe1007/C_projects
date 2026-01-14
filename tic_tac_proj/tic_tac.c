@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h> 
 
 void display_game_info(int rows, int cols, char (*matrix)[cols]);
 
@@ -11,9 +12,10 @@ int main() {
     int col_choice;
     int game_choice;
 
-    char player1[50];
-    char player2[50];
     char value_added;
+    char name_player_1[50];
+    char name_player_2[50];
+    bool turn_player_1 = true;
 
     char (*matrix)[cols] = malloc(rows * cols * sizeof(char));
 
@@ -36,7 +38,25 @@ int main() {
     }
 
     if (game_choice == 1) {
+        printf("Enter name for Player 1: ");
+        if (scanf("%49s", name_player_1) != 1) {
+            printf("Invalid input for Player 1 name.\n");
+            return 1;
+        }
+        
+        printf("Enter name for Player 2: ");
+        if (scanf("%49s", name_player_2) != 1) {
+            printf("Invalid input for Player 2 name.\n");
+            return 1;
+        }
+
         while (1) {
+            if (turn_player_1) {
+                printf("%s's turn (x)\n", name_player_1);
+            } else {
+                printf("%s's turn (o)\n", name_player_2);
+            }
+
             while (1){
                 printf("Type the row you want to fill (0-%d): ", rows - 1);
                 if (scanf("%d", &row_choice) != 1 || row_choice < 0 || row_choice >= rows) {
@@ -90,7 +110,7 @@ int main() {
                 if (matrix[i][0] == matrix[i][1] && 
                     matrix[i][1] == matrix[i][2] && 
                     matrix[i][0] != ' ') {
-                    printf("you win!\n");
+                    printf("You win %s!\n", turn_player_1 ? name_player_1 : name_player_2);
                     return 0;
                 }
             }
@@ -99,7 +119,7 @@ int main() {
                 if (matrix[0][i] == matrix[1][i] && 
                     matrix[1][i] == matrix[2][i] && 
                     matrix[0][i] != ' ') {
-                    printf("you win!\n");
+                    printf("You win %s!\n", turn_player_1 ? name_player_1 : name_player_2);
                     return 0;
                 }
             }
@@ -107,14 +127,14 @@ int main() {
             if (matrix[0][0] == matrix[1][1] && 
                 matrix[1][1] == matrix[2][2] && 
                 matrix[0][0] != ' ') {
-                printf("you win!\n");
+                printf("You win %s!\n", turn_player_1 ? name_player_1 : name_player_2);
                 return 0;
             }
 
             if (matrix[0][2] == matrix[1][1] && 
                 matrix[1][1] == matrix[2][0] && 
                 matrix[0][2] != ' ') {
-                printf("you win!\n");
+                printf("You win %s!\n", turn_player_1 ? name_player_1 : name_player_2);
                 return 0;
             }
 
@@ -126,6 +146,8 @@ int main() {
                 }
             }
             printf("\n");
+
+            turn_player_1 = !turn_player_1;
         }
     } else {
         printf("Goodbye!\n");
