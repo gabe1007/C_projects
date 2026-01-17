@@ -11,6 +11,7 @@ int main() {
     int row_choice;
     int col_choice;
     int game_choice;
+    int move_count = 0;
 
     char value_added;
     char name_player_1[50];
@@ -18,6 +19,11 @@ int main() {
     bool turn_player_1 = true;
 
     char (*matrix)[cols] = malloc(rows * cols * sizeof(char));
+
+    if (matrix == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        return 1;
+    }
 
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
@@ -40,6 +46,10 @@ int main() {
     }
 
     while (1) {
+        if (move_count == 9) {
+            printf("It's a draw!\n");
+            break;
+        }
         if (turn_player_1) {
             printf("%s's turn (x)\n", name_player_1);
         } else {
@@ -108,7 +118,7 @@ int main() {
                 matrix[i][1] == matrix[i][2] && 
                 matrix[i][0] != ' ') {
                 printf("You win %s!\n", turn_player_1 ? name_player_1 : name_player_2);
-                return 0;
+                break;
             }
         }
 
@@ -117,7 +127,7 @@ int main() {
                 matrix[1][i] == matrix[2][i] && 
                 matrix[0][i] != ' ') {
                 printf("You win %s!\n", turn_player_1 ? name_player_1 : name_player_2);
-                return 0;
+                break;
             }
         }
 
@@ -125,14 +135,14 @@ int main() {
             matrix[1][1] == matrix[2][2] && 
             matrix[0][0] != ' ') {
             printf("You win %s!\n", turn_player_1 ? name_player_1 : name_player_2);
-            return 0;
+            break;
         }
 
         if (matrix[0][2] == matrix[1][1] && 
             matrix[1][1] == matrix[2][0] && 
             matrix[0][2] != ' ') {
             printf("You win %s!\n", turn_player_1 ? name_player_1 : name_player_2);
-            return 0;
+            break;
         }
 
         system("clear");
@@ -147,6 +157,7 @@ int main() {
         }
         printf("\n");
 
+        move_count++;
         turn_player_1 = !turn_player_1;
     }
     free(matrix);
@@ -173,4 +184,3 @@ void display_game_info(int rows, int cols, char (*matrix)[cols]) {
 
     printf("\n");
 }
-
