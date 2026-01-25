@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+bool filename_check (char *filename);
+
 int main() {
 
     char path[256];
@@ -100,7 +102,7 @@ int main() {
     while (getchar() != '\n'); // clear newline left by scanf
 
     switch (option) {
-        case 1:
+        case 1: {
             DIR *d = opendir(path);
             struct dirent *f;
             
@@ -119,9 +121,12 @@ int main() {
             closedir(d);
 
             break;
-        case 2:
+        };
+        case 2: {
             FILE *fptr;
             char filename[300];
+            char txt_to_add[500];
+            char full_path[560];
             bool valid_filename;
 
             while (1) {
@@ -129,23 +134,111 @@ int main() {
                 fgets(filename, sizeof(filename), stdin);
                 filename[strcspn(filename, "\n")] = '\0';
                 
-                valid_filename = true;
-                for (int i = 0; filename[i] != '\0'; i++) {
-                    if (filename[i] == '.' || filename[i] == ' ') {
-                        printf("Invalid filename. Dots and spaces are not allowed.\n");
-                        valid_filename = false;
-                        break;
-                    }
-                }
+                valid_filename = filename_check(filename);
                 
                 if (valid_filename) {
                     break;
                 }
             }
+            
+            snprintf(full_path, sizeof(full_path), "%s/%s.txt", path, filename);
+
+            printf("Type in the content of the file: \n");
+            printf("and use # in order to add a new line. \n");
+            fgets(txt_to_add, sizeof(txt_to_add), stdin);
+            txt_to_add[strcspn(txt_to_add, "\n")] = '\0';
+
+            for (int i = 0; txt_to_add[i] != '\0'; i++) {
+                if (txt_to_add[i] == '#') {
+                    txt_to_add[i] = '\n';
+                }
+            }
+
+            fptr = fopen(full_path, "w");
+            if (fptr == NULL) {
+                fptr = fopen(full_path, "w");
+            };
+            fprintf(fptr, "%s", txt_to_add);
+            printf("Text file created successfully\n");
+            fclose(fptr);
+
             break;
-        case 3:
-            printf("You chose option 3\n");
+        };
+        case 3: {
+            DIR *d = opendir(path);
+            struct dirent *f;
+            char filename[300];
+            char full_path[560];
+            char line[100];
+            FILE *fptr = NULL;
+            bool valid_filename;
+            bool file_found = false;
+
+            while (1) {
+                printf("Which file do you want to read? Please add the extension: \n");
+                fgets(filename, sizeof(filename), stdin);
+                filename[strcspn(filename, "\n")] = '\0';
+
+                if (filename[0] == '/') {
+                    printf("Fullpaths are not allowed, please try again\n");
+                    continue;
+                }
+
+                if (strlen(filename) == 0) {
+                    printf("Filenames cannot be empty. Try again \n");
+                    continue;
+                }
+                
+                valid_filename = true;
+
+                if (valid_filename) {
+                    break;
+                }
+            }
+            
+            if (d == NULL) {
+                printf("Could not open directory: %s\n", path);
+                return 1;
+            }
+            
+            while ((f = readdir(d)) != NULL) {
+                if (strcmp(f->d_name, ".") == 0 || strcmp(f->d_name, "..") == 0) {
+                    continue;
+                }
+
+                if (strcmp(f->d_name, filename) == 0) {
+                    file_found = true;
+                }
+            };
+
+            if (file_found){
+                char *ext = strrchr(filename, '.');
+
+                if (ext != NULL && (strcmp(ext, ".png") == 0 || strcmp(ext, ".jpg") == 0)) {
+                    printf("This is an image, implement later");
+                } else if (ext != NULL && strcmp(ext, ".txt") == 0) {
+                    snprintf(full_path, sizeof(full_path), "%s/%s", path, filename);
+
+                    fptr = fopen(full_path, "r+");
+
+                    if (fptr == NULL) {
+                        printf("Error opening the file: %s\n", full_path);
+                    } else {
+                        printf("These are the contents of the file: \n\n");
+                        while (fgets(line, sizeof(line), fptr) != NULL) {
+                            printf("%s", line);
+                        }
+                        fclose(fptr);
+                    }
+                }
+            } else {
+                printf("File not found. Did you add an extension?\n");
+            }
+
+            closedir(d);
+
             break;
+        };
         case 4:
             printf("You chose option 4\n");
             break;
@@ -157,5 +250,14 @@ int main() {
     return 0;
 }
 
+bool filename_check (char *filename) {
+    for (int i = 0; filename[i] != '\0'; i++) {
+        if (filename[i] == '.' || filename[i] == ' ') {
+            printf("Invalid filename. Dots and/or spaces are not allowed.\n");
+            return false; 
+        }
+    }
 
+    return true;
+}
     
