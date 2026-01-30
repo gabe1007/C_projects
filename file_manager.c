@@ -215,7 +215,7 @@ int main() {
                 char *ext = strrchr(filename, '.');
 
                 if (ext != NULL && (strcmp(ext, ".png") == 0 || strcmp(ext, ".jpg") == 0)) {
-                    printf("This is an image, implement later");
+                    printf("This is an image, implement later (maybe)");
                 } else if (ext != NULL && strcmp(ext, ".txt") == 0) {
                     snprintf(full_path, sizeof(full_path), "%s/%s", path, filename);
 
@@ -239,9 +239,63 @@ int main() {
 
             break;
         };
-        case 4:
-            printf("You chose option 4\n");
+        case 4: {
+            DIR *d = opendir(path);
+            struct dirent *f;
+            char filename[300];
+            char full_path[560];
+            bool valid_filename;
+            bool file_found;
+
+            while (1) {
+                printf("Which file do you want to delete? Please add the extension: \n");
+                fgets(filename, sizeof(filename), stdin);
+                filename[strcspn(filename, "\n")] = '\0';
+
+                if (filename[0] == '/') {
+                    printf("Fullpaths are not allowed, please try again\n");
+                    continue;
+                }
+
+                if (strlen(filename) == 0) {
+                    printf("Filenames cannot be empty. Try again \n");
+                    continue;
+                }
+                
+                valid_filename = true;
+
+                if (valid_filename) {
+                    break;
+                }
+            }
+
+            if (d == NULL) {
+                printf("Could not open directory: %s\n", path);
+                return 1;
+            }
+
+            while ((f = readdir(d)) != NULL) {
+                if (strcmp(f->d_name, ".") == 0 || strcmp(f->d_name, "..") == 0) {
+                    continue;
+                }
+
+                if (strcmp(f->d_name, filename) == 0) {
+                    file_found = true;
+                }
+            };
+
+            if (file_found) {
+                snprintf(full_path, sizeof(full_path), "%s/%s", path, filename);
+                
+                if (remove(full_path) == 0) {
+                    printf("Deleted file: %s\n", filename);
+                } else {
+                    perror("Failed to delete file");
+                }
+            }
+
             break;
+        }
         default:  
             printf("Invalid option.\n");  
             break;
