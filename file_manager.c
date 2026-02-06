@@ -5,6 +5,8 @@
 #include <stdbool.h>
 
 bool filename_check (char *filename);
+void validfilename(char *filename, size_t size, bool is_delete_prompt);
+void openfile (FILE **fptr, char *filename);
 
 int main() {
 
@@ -56,7 +58,9 @@ int main() {
         }
         if (file_ope_option == 1) {
             char line[256];
-            FILE *fptr = fopen(path, "r");
+            FILE *fptr = NULL;
+
+            openfile(&fptr, path);
 
             if (fptr == NULL) {
                 printf("Error opening file: %s\n", path);
@@ -66,7 +70,9 @@ int main() {
             while (fgets(line, sizeof(line), fptr) != NULL) {
                 printf("%s", line);
             }
+            
             fclose(fptr);
+
         } else if (file_ope_option == 2) {
             // Delete file
             if (remove(path) == 0) {
@@ -123,7 +129,7 @@ int main() {
             break;
         };
         case 2: {
-            FILE *fptr;
+            FILE *fptr = NULL;
             char filename[300];
             char txt_to_add[500];
             char full_path[560];
@@ -154,10 +160,7 @@ int main() {
                 }
             }
 
-            fptr = fopen(full_path, "w");
-            if (fptr == NULL) {
-                fptr = fopen(full_path, "w");
-            };
+            openfile(&fptr, full_path);
             fprintf(fptr, "%s", txt_to_add);
             printf("Text file created successfully\n");
             fclose(fptr);
@@ -166,35 +169,16 @@ int main() {
         };
         case 3: {
             DIR *d = opendir(path);
+            FILE *fptr = NULL;
             struct dirent *f;
             char filename[300];
             char full_path[560];
             char line[100];
-            FILE *fptr = NULL;
             bool valid_filename;
             bool file_found = false;
+            bool is_delete_prompt = false;
 
-            while (1) {
-                printf("Which file do you want to read? Please add the extension: \n");
-                fgets(filename, sizeof(filename), stdin);
-                filename[strcspn(filename, "\n")] = '\0';
-
-                if (filename[0] == '/') {
-                    printf("Fullpaths are not allowed, please try again\n");
-                    continue;
-                }
-
-                if (strlen(filename) == 0) {
-                    printf("Filenames cannot be empty. Try again \n");
-                    continue;
-                }
-                
-                valid_filename = true;
-
-                if (valid_filename) {
-                    break;
-                }
-            }
+            validfilename(filename, sizeof(filename), is_delete_prompt);
             
             if (d == NULL) {
                 printf("Could not open directory: %s\n", path);
@@ -245,29 +229,10 @@ int main() {
             char filename[300];
             char full_path[560];
             bool valid_filename;
-            bool file_found;
+            bool file_found = false;
+            bool is_delete_prompt = true;
 
-            while (1) {
-                printf("Which file do you want to delete? Please add the extension: \n");
-                fgets(filename, sizeof(filename), stdin);
-                filename[strcspn(filename, "\n")] = '\0';
-
-                if (filename[0] == '/') {
-                    printf("Fullpaths are not allowed, please try again\n");
-                    continue;
-                }
-
-                if (strlen(filename) == 0) {
-                    printf("Filenames cannot be empty. Try again \n");
-                    continue;
-                }
-                
-                valid_filename = true;
-
-                if (valid_filename) {
-                    break;
-                }
-            }
+            validfilename(filename, sizeof(filename), is_delete_prompt);
 
             if (d == NULL) {
                 printf("Could not open directory: %s\n", path);
@@ -292,7 +257,11 @@ int main() {
                 } else {
                     perror("Failed to delete file");
                 }
+            } else {
+                printf("File not found. Did you add an extension?\n");
             }
+
+            closedir(d);
 
             break;
         }
@@ -314,4 +283,36 @@ bool filename_check (char *filename) {
 
     return true;
 }
-    
+
+void validfilename(char *filename, size_t size, bool is_delete_prompt) {
+    if (is_delete_prompt){
+        printf("Which file do you want to delete? Please add the extension: \n");
+    } else {
+        printf("Which file do you want to read? Please add the extension: \n");
+    }
+    while (1) {
+        fgets(filename, size, stdin);
+        filename[strcspn(filename, "\n")] = '\0';
+
+        if (filename[0] == '/') {
+            printf("Fullpaths are not allowed, please try again\n");
+            continue;
+        }
+
+        if (strlen(filename) == 0) {
+            printf("Filenames cannot be empty. Try again \n");
+            continue;
+        }
+        
+        break;
+    }
+}
+
+void openfile (FILE **fptr, char *filename) {
+    *fptr = fopen(filename, "r+");
+
+    if (*fptr == NULL) {
+        *fptr = fopen(filename, "w+");
+    }
+
+}
