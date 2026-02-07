@@ -1,22 +1,22 @@
 #define _DEFAULT_SOURCE
 #include <dirent.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
 
-bool filename_check (char *filename);
+bool filename_check(char *filename);
 void validfilename(char *filename, size_t size, bool is_delete_prompt);
-void openfile (FILE **fptr, char *filename);
+void openfile(FILE **fptr, char *filename);
+bool findfile(DIR *d, char *filename, bool file_found, char *path, struct dirent *f);
 
 int main() {
-
     char path[256];
     int option = 0;
     int file_ope_option = 0;
     bool is_file_path = false;
 
     printf("Type the path to be read: \n");
-  
+
     while (1) {
         fgets(path, sizeof(path), stdin);
         path[strcspn(path, "\n")] = '\0';
@@ -28,7 +28,7 @@ int main() {
         break;
     }
 
-    char *last_slash = strrchr(path, '/'); 
+    char *last_slash = strrchr(path, '/');
 
     if (last_slash != NULL) {
         // Check if there's a dot after the last slash
@@ -66,11 +66,11 @@ int main() {
                 printf("Error opening file: %s\n", path);
                 return 1;
             }
-            
+
             while (fgets(line, sizeof(line), fptr) != NULL) {
                 printf("%s", line);
             }
-            
+
             fclose(fptr);
 
         } else if (file_ope_option == 2) {
@@ -93,19 +93,19 @@ int main() {
     while (1) {
         if (scanf("%d", &option) != 1) {
             printf("Invalid input. Please enter a number.\n");
-            while (getchar() != '\n'); // clear invalid input
+            while (getchar() != '\n');
             continue;
         }
 
         if (option < 1 || option > 4) {
             printf("Only choose 1, 2, 3 or 4.\n");
-            while (getchar() != '\n'); // clear invalid input
+            while (getchar() != '\n');
             continue;
         }
         break;
     }
     
-    while (getchar() != '\n'); // clear newline left by scanf
+    while (getchar() != '\n');
 
     switch (option) {
         case 1: {
@@ -180,20 +180,7 @@ int main() {
 
             validfilename(filename, sizeof(filename), is_delete_prompt);
             
-            if (d == NULL) {
-                printf("Could not open directory: %s\n", path);
-                return 1;
-            }
-            
-            while ((f = readdir(d)) != NULL) {
-                if (strcmp(f->d_name, ".") == 0 || strcmp(f->d_name, "..") == 0) {
-                    continue;
-                }
-
-                if (strcmp(f->d_name, filename) == 0) {
-                    file_found = true;
-                }
-            };
+            file_found = findfile(d, filename, file_found, path, f);
 
             if (file_found){
                 char *ext = strrchr(filename, '.');
@@ -234,20 +221,8 @@ int main() {
 
             validfilename(filename, sizeof(filename), is_delete_prompt);
 
-            if (d == NULL) {
-                printf("Could not open directory: %s\n", path);
-                return 1;
-            }
-
-            while ((f = readdir(d)) != NULL) {
-                if (strcmp(f->d_name, ".") == 0 || strcmp(f->d_name, "..") == 0) {
-                    continue;
-                }
-
-                if (strcmp(f->d_name, filename) == 0) {
-                    file_found = true;
-                }
-            };
+            file_found = findfile(d, filename, file_found, path, f);
+    
 
             if (file_found) {
                 snprintf(full_path, sizeof(full_path), "%s/%s", path, filename);
@@ -273,11 +248,11 @@ int main() {
     return 0;
 }
 
-bool filename_check (char *filename) {
+bool filename_check(char *filename) {
     for (int i = 0; filename[i] != '\0'; i++) {
         if (filename[i] == '.' || filename[i] == ' ') {
             printf("Invalid filename. Dots and/or spaces are not allowed.\n");
-            return false; 
+            return false;
         }
     }
 
@@ -285,7 +260,7 @@ bool filename_check (char *filename) {
 }
 
 void validfilename(char *filename, size_t size, bool is_delete_prompt) {
-    if (is_delete_prompt){
+    if (is_delete_prompt) {
         printf("Which file do you want to delete? Please add the extension: \n");
     } else {
         printf("Which file do you want to read? Please add the extension: \n");
@@ -303,16 +278,34 @@ void validfilename(char *filename, size_t size, bool is_delete_prompt) {
             printf("Filenames cannot be empty. Try again \n");
             continue;
         }
-        
+
         break;
     }
 }
 
-void openfile (FILE **fptr, char *filename) {
+void openfile(FILE **fptr, char *filename) {
     *fptr = fopen(filename, "r+");
 
     if (*fptr == NULL) {
         *fptr = fopen(filename, "w+");
     }
+}
 
+bool findfile(DIR *d, char *filename, bool file_found, char *path, struct dirent *f) {
+    if (d == NULL) {
+            printf("Could not open directory: %s\n", path);
+            return false;
+    }
+
+    while ((f = readdir(d)) != NULL) {
+        if (strcmp(f->d_name, ".") == 0 || strcmp(f->d_name, "..") == 0) {
+            continue;
+        }
+        printf("Comparing %s with %s\n", f->d_name, filename);
+
+        if (strcmp(f->d_name, filename) == 0) {
+            return true;
+        }
+    };
+    return false;
 }
