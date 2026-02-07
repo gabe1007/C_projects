@@ -301,7 +301,6 @@ bool findfile(DIR *d, char *filename, bool file_found, char *path, struct dirent
         if (strcmp(f->d_name, ".") == 0 || strcmp(f->d_name, "..") == 0) {
             continue;
         }
-        printf("Comparing %s with %s\n", f->d_name, filename);
 
         if (strcmp(f->d_name, filename) == 0) {
             return true;
