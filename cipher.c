@@ -26,7 +26,61 @@ int main() {
 
     switch (option) {
         case 1: {
-            printf("Caesar Cypher, to be implemented\n");
+            char word[256];
+            char buffer[256];
+            int escolha;
+            int i;
+
+            printf("1 - Encode\n");
+            printf("2 - Decode\n");
+
+            while (1) {
+                if (scanf("%d", &escolha) != 1) {
+                    printf("Only numbers, please");
+                    while (getchar() != '\n');
+                    continue;
+                }
+
+                if (escolha < 1 || escolha > 2) {
+                    printf("Only choose 1 or 2");
+                    while(getchar() != '\n');
+                    continue;
+                }
+                break;
+            }
+
+            if (escolha == 1) {
+                while (getchar() != '\n'); // Clear the newline left by scanf
+                printf("Type in the word you want to encode\n");
+                fgets(word, sizeof(word), stdin);
+                word[strcspn(word, "\n")] = '\0';
+
+                for (i = 0; word[i] != '\0'; i++){
+                    if ((word[i] >= 'A' && word[i] <= 'Z') || (word[i] >= 'a' && word[i] <= 'z')){
+                        buffer[i] = word[i] + 3;
+                    } else {
+                        buffer[i] = word[i];
+                    }
+                }
+                buffer[i] = '\0'; 
+
+            } else {
+                while (getchar() != '\n');
+                printf("Type in the word you want to decode\n");
+                fgets(word, sizeof(word), stdin);
+                word[strcspn(word, "\n")] = '\0';
+
+                for (i = 0; word[i] != '\0'; i++){
+                    if ((word[i] >= 'A' && word[i] <= 'Z') || (word[i] >= 'a' && word[i] <= 'z')){
+                        buffer[i] = word[i] - 3;
+                    } else {
+                        buffer[i] = word[i];
+                    }
+                }
+                buffer[i] = '\0';
+            }
+
+            printf("%s\n", buffer);
             break;
         }
 
