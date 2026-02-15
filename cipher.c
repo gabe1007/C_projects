@@ -1,5 +1,8 @@
 # include <stdio.h>
 # include <string.h>
+# include <ctype.h>
+
+void input_validation(int *escolha);
 
 int main() {
     int option;
@@ -34,20 +37,7 @@ int main() {
             printf("1 - Encode\n");
             printf("2 - Decode\n");
 
-            while (1) {
-                if (scanf("%d", &escolha) != 1) {
-                    printf("Only numbers, please");
-                    while (getchar() != '\n');
-                    continue;
-                }
-
-                if (escolha < 1 || escolha > 2) {
-                    printf("Only choose 1 or 2");
-                    while(getchar() != '\n');
-                    continue;
-                }
-                break;
-            }
+            input_validation(&escolha);
 
             if (escolha == 1) {
                 while (getchar() != '\n'); // Clear the newline left by scanf
@@ -100,20 +90,7 @@ int main() {
             printf("1 - Encode\n");
             printf("2 - Decode\n");
 
-            while (1) {
-                if (scanf("%d", &escolha) != 1) {
-                    printf("Only numbers, please");
-                    while (getchar() != '\n');
-                    continue;
-                }
-
-                if (escolha < 1 || escolha > 2) {
-                    printf("Only choose 1 or 2");
-                    while(getchar() != '\n');
-                    continue;
-                }
-                break;
-            }
+            input_validation(&escolha);
 
             if (escolha == 1) {
                 while (getchar() != '\n'); // Clear the newline left by scanf
@@ -139,7 +116,7 @@ int main() {
 
             } else {
 
-                while (getchar() != '\n'); // Clear the newline left by scanf
+                while (getchar() != '\n');
                 printf("Use groups of 2, for example:\n1a2b\n");
                 printf("If you do like:\n1a5\n");
                 printf("IT IS NOT GOING TO WORK\n");
@@ -174,9 +151,60 @@ int main() {
         }
 
         case 3: {
-            printf("Vinegere, to be implemented\n");
-            break;
+            char word[256];
+            char key[256];
+            char buffer[256];
+            int escolha;
+            int i;
+
+            
+            printf("1 - Encode\n");
+            printf("2 - Decode\n");
+
+            input_validation(&escolha);
+
+            if (escolha == 1) {
+                while (getchar() != '\n');
+                printf("Type in the text you want to encode: \n");
+                fgets(word, sizeof(word), stdin);
+                word[strcspn(word, "\n")] = '\0';
+
+                printf("Type in the key you want to use: \n");
+                fgets(key, sizeof(key), stdin);
+                key[strcspn(key, "\n")] = '\0';
+
+                for (i=0; word[i]; i++) {
+                    word[i] = toupper(word[i]);
+                }
+
+                for (i=0; key[i]; i++) {
+                    key[i] = toupper(key[i]);
+                }
+
+                printf("%s\n", word);
+                printf("%s\n", key);
+            } else {
+                printf("To be implemented");
+            }
+
         }
 
     } 
+}
+
+void input_validation(int *escolha) {
+    while (1) {
+        if (scanf("%d", escolha) != 1) {
+            printf("Only numbers, please\n");
+            while (getchar() != '\n');
+            continue;
+        }
+
+        if (*escolha < 1 || *escolha > 2) {
+            printf("Only choose 1 or 2");
+            while(getchar() != '\n');
+            continue;
+        }
+        break;
+    }
 }
