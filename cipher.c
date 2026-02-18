@@ -1,6 +1,7 @@
 # include <stdio.h>
 # include <string.h>
 # include <ctype.h>
+# include <stdbool.h>
 
 void input_validation(int *escolha);
 
@@ -151,9 +152,11 @@ int main() {
         }
 
         case 3: {
-            char word[256];
-            char key[256];
+            unsigned char word[256];
+            char key[] = "VINEGERE";
+            char _key[256];
             char buffer[256];
+            int has_accent = 0;
             int escolha;
             int i;
 
@@ -166,23 +169,38 @@ int main() {
             if (escolha == 1) {
                 while (getchar() != '\n');
                 printf("Type in the text you want to encode: \n");
-                fgets(word, sizeof(word), stdin);
-                word[strcspn(word, "\n")] = '\0';
 
-                printf("Type in the key you want to use: \n");
-                fgets(key, sizeof(key), stdin);
-                key[strcspn(key, "\n")] = '\0';
+                while (1) {
+                    fgets(word, sizeof(word), stdin);
+                    word[strcspn(word, "\n")] = '\0';
+                    
+                    has_accent = 0;
+                    for (i = 0; word[i]; i++){
+                        if (word[i] > 127) {
+                            printf("Please do not use accents. Type in again:\n");
+                            has_accent = 1;
+                            break;
+                        }
+                    }
+                    if (has_accent) {
+                        continue;
+                    }
+                    break;
+                }
 
                 for (i=0; word[i]; i++) {
                     word[i] = toupper(word[i]);
                 }
 
-                for (i=0; key[i]; i++) {
-                    key[i] = toupper(key[i]);
+                int key_len = strlen(key);
+                int word_len = strlen(word);
+
+                for (i=0; i < (word_len); i++) {
+                    _key[i] = key[i % key_len];
                 }
 
                 printf("%s\n", word);
-                printf("%s\n", key);
+                printf("%s\n", _key);
             } else {
                 printf("To be implemented");
             }
