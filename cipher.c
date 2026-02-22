@@ -4,6 +4,9 @@
 # include <stdbool.h>
 
 void input_validation(int *escolha);
+void word_val(unsigned char *word, size_t size);
+void space_val(unsigned char *word, char *key, char *key_, int key_len, int word_len);
+void to_upper(unsigned char *word);
 
 int main() {
     int option;
@@ -139,6 +142,7 @@ int main() {
                 for (i=0; word[i] && word[i+1]; i+=2) {
                     hex[0] = word[i];
                     hex[1] = word[i+1];
+                    hex[2] = '\0';
                     sscanf(hex, "%x", &num);
 
                     buffer[j++] = num ^ key;
@@ -153,11 +157,15 @@ int main() {
 
         case 3: {
             unsigned char word[256];
+            unsigned char cyphered_word[256];
             char key[] = "VINEGERE";
-            char _key[256];
+            char key_[256];
             char buffer[256];
             int has_accent = 0;
             int escolha;
+            int word_pos;
+            int key_pos;
+            int cypher_pos;
             int i;
 
             
@@ -170,43 +178,63 @@ int main() {
                 while (getchar() != '\n');
                 printf("Type in the text you want to encode: \n");
 
-                while (1) {
-                    fgets(word, sizeof(word), stdin);
-                    word[strcspn(word, "\n")] = '\0';
-                    
-                    has_accent = 0;
-                    for (i = 0; word[i]; i++){
-                        if (word[i] > 127) {
-                            printf("Please do not use accents. Type in again:\n");
-                            has_accent = 1;
-                            break;
-                        }
-                    }
-                    if (has_accent) {
-                        continue;
-                    }
-                    break;
-                }
+                word_val(word, sizeof(word));
 
-                for (i=0; word[i]; i++) {
-                    word[i] = toupper(word[i]);
-                }
+                to_upper(word);
 
-                int key_len = strlen(key);
+                int key_len  = strlen(key);
                 int word_len = strlen(word);
 
-                for (i=0; i < (word_len); i++) {
-                    _key[i] = key[i % key_len];
-                }
+                space_val(word, key, key_, key_len, word_len);
 
-                printf("%s\n", word);
-                printf("%s\n", _key);
+                key_[word_len] = '\0';
+
+                for (i=0; word[i]; i++) {                  
+                    if (word[i] == ' ') {
+                        cyphered_word[i] = ' ';
+                    } else {
+                        word_pos   = word[i] - 'A';
+                        key_pos    = key_[i] - 'A';
+                        cypher_pos = (word_pos + key_pos) % 26;
+                    
+                        cyphered_word[i] = cypher_pos + 'A';
+                    }
+                }
+                cyphered_word[i] = '\0';
+
+                printf("%s\n", cyphered_word);
             } else {
-                printf("To be implemented");
+                while (getchar() != '\n');
+                printf("Type in the text you want to decode: \n");
+
+                word_val(word, sizeof(word));
+
+                to_upper(word);
+
+                int key_len  = strlen(key);
+                int word_len = strlen(word);
+
+                space_val(word, key, key_, key_len, word_len);
+
+                key_[word_len] = '\0';
+
+                for (i=0; word[i]; i++) {                  
+                    if (word[i] == ' ') {
+                        cyphered_word[i] = ' ';
+                    } else {
+                        word_pos   = word[i] - 'A';
+                        key_pos    = key_[i] - 'A';
+                        cypher_pos = (word_pos - key_pos + 26) % 26;
+                    
+                        cyphered_word[i] = cypher_pos + 'A';
+                    }
+                }
+                cyphered_word[i] = '\0';
+
+                printf("%s\n", cyphered_word);
             }
 
         }
-
     } 
 }
 
@@ -226,3 +254,49 @@ void input_validation(int *escolha) {
         break;
     }
 }
+
+void word_val(unsigned char *word, size_t size) {
+    int has_accent;
+    int i;
+
+    while (1) {
+        fgets(word, size, stdin);
+        word[strcspn(word, "\n")] = '\0';
+        
+        has_accent = 0;
+        for (i = 0; word[i]; i++){
+            if (word[i] > 127) {
+                printf("Please do not use accents. Type in again:\n");
+                has_accent = 1;
+                break;
+            }
+        }
+        if (has_accent) {
+            continue;
+        }
+        break;
+    }
+}
+
+void space_val(unsigned char *word, char *key, char *key_, int key_len, int word_len) {
+    int i;
+    int j = 0;
+    
+    for (i=0; i < (word_len); i++) {
+        if (word[i] == ' ') {
+            key_[i] = ' ';
+        } else {
+            key_[i] = key[j % key_len];
+            j++;
+        }
+    }
+}
+
+void to_upper(unsigned char *word) {
+    int i; 
+    
+    for (i=0; word[i]; i++) {
+        word[i] = toupper(word[i]);
+    }
+}
+
