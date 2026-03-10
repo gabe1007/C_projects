@@ -8,6 +8,8 @@ typedef struct Node {
 
 void print(Node **front);
 void enqueue(Node **front, Node **rear, int value);
+void dequeue(Node **front, Node **rear);
+void peek(Node **front);
 
 int main() {
     Node *front = NULL;
@@ -19,7 +21,17 @@ int main() {
 
     print(&front);
     enqueue(&front, &rear, 15);
+
+    printf("Print after adding 15\n");
     print(&front);
+
+    dequeue(&front, &rear);
+    printf("Print after removing the first node\n");
+    print(&front);
+
+    printf("Calling peek now\n");
+    peek(&front);
+
 
 }
 
@@ -48,4 +60,26 @@ void enqueue(Node **front, Node **rear, int value) {
         (*rear)->next = novo;
         *rear = novo;
     }
+}
+
+void dequeue(Node **front, Node **rear) {
+    if (*front == NULL ){
+        printf("Queue is empty\n");
+        exit(0);
+    }
+    Node *tmp = *front;
+    *front = (*front)->next;
+    free(tmp);
+
+    if (*front == NULL) { 
+        *rear = NULL;
+    }
+}
+
+void peek(Node **front) {
+    if (*front == NULL) {
+        printf("Queue is empty\n");
+        exit(0);
+    }
+    printf("The first node is: %d\n", (*front)->value);
 }
