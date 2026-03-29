@@ -19,6 +19,7 @@ void insert(Table *dicio, char *chave, int value);
 unsigned long djb2_hash(unsigned char *str, int tamanho);
 void search(char *search_key, Table *dicio);
 void remover(char *search_key, Table *dicio);
+void free_table(Table *dicio);
 
 int main() {
     int tamanho          = 15;
@@ -42,10 +43,26 @@ int main() {
     print(tamanho, dicio);
 
     char search_key[256] = "Idade";
-    // search(search_key, dicio);
+    search(search_key, dicio);
     remover(search_key, dicio);
     print(tamanho, dicio);
+    free_table(dicio);
 
+}
+
+void free_table(Table *dicio) {
+    for (int i = 0; i < dicio->tamanho; i++) {
+        if (dicio->vetor[i] != NULL) {
+            Node *current = dicio->vetor[i];
+            while (current != NULL) {
+                Node *tmp = current->next;
+                free(current);
+                current = tmp;
+            }
+        }
+    }
+    free(dicio->vetor);
+    free(dicio);
 }
 
 void remover(char *search_key, Table *dicio) {
