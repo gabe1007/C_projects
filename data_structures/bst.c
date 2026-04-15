@@ -11,27 +11,31 @@ typedef struct Node {
 
 void print(Node *bst);
 void insert(Node **bst, int value);
-void search(Node **bst, int search_val);
+Node *search(Node **bst, int search_val);
 
 int main() {
     srand(time(NULL));
-    int *array = calloc(10, sizeof(int));
+    int *array = calloc(20, sizeof(int));
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 20; i++) {
         array[i] = rand() % 100;
     }
 
     Node *bst = NULL;
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 20; i++) {
         insert(&bst, array[i]);
         printf("array[%d] = %d\n", i, array[i]);
     }
     
     print(bst);    
     
-    int search_val = 120;
-    search(&bst, search_val);
-
+    int search_val = array[15];
+    Node *result = search(&bst, search_val);
+    if (result) {
+        printf("Nó encontrado: %d\n", result->value);
+    } else {
+        printf("Nó não encontrado\n");
+    }
 }
 
 void print(Node *bst) {
@@ -77,30 +81,21 @@ void insert(Node **bst, int value) {
     }
 }
 
-void search (Node **bst, int search_val) {
+Node *search (Node **bst, int search_val) {
     Node *current = *bst;
-    bool found = false;
     
     while (current != NULL) {
         if (search_val > current->value){
-            if (current->value != search_val){
-                current = current->maior;
-            } else {
-                printf("Valor encontrado: %d\n", current->value);
-                found = true;
-                break;
+            if (current->value == search_val){
+                return current;
             }
+            current = current->maior;
         } else {
-            if (current->value != search_val){
-                current = current->menor;
-            } else {
-                printf("Valor encontrado: %d\n", current->value);
-                found = true;
-                break;
+            if (current->value == search_val){
+                return current;
             }
+            current = current->menor;
         }
     }
-    if (!found) {
-        printf("Valor não encontrado\n");
-    }
+    return NULL;
 }
