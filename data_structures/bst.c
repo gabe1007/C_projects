@@ -15,17 +15,18 @@ Node *search(Node **bst, int search_val);
 Node *find_min(Node **bst);
 Node *find_max(Node **bst);
 void del_node(Node **bst, int val, bool *flag);
+int height(Node **bst) ;
 
 int main() {
     srand(time(NULL));
-    int *array = calloc(20, sizeof(int));
+    int *array = calloc(30, sizeof(int));
 
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 30; i++) {
         array[i] = rand() % 100;
     }
 
     Node *bst = NULL;
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < 30; i++) {
         insert(&bst, array[i]);
         printf("array[%d] = %d\n", i, array[i]);
     }
@@ -65,6 +66,9 @@ int main() {
     } else {
         printf("Value %d not found\n", val);
     }
+
+    int height_tree = height(&bst); 
+    printf("The tree heigh is: %d\n", height_tree);
 }
 
 void print(Node *bst) {
@@ -145,7 +149,7 @@ Node *find_max(Node **bst) {
     return current;
 }
 
-// the inorder successor (smallest in right subtree)
+// the inorder successor
 Node *get_successor(Node *curr) {
     curr = curr->maior;
     while (curr->menor != NULL)
@@ -153,7 +157,6 @@ Node *get_successor(Node *curr) {
     return curr;
 }
 
-// Function to delete a node with value x from BST
 void del_node(Node **bst, int val, bool *flag) {
     if (*bst == NULL) return;
 
@@ -183,5 +186,20 @@ void del_node(Node **bst, int val, bool *flag) {
         Node *succ = get_successor(*bst);
         (*bst)->value = succ->value;
         del_node(&(*bst)->maior, succ->value, flag);
+    }
+}
+
+int height(Node **bst) {
+    if(*bst == NULL) {
+        return 0;
+    }
+
+    int rightheight = height(&((*bst)->maior));
+    int leftheight  = height(&((*bst)->menor));
+    
+    if (leftheight > rightheight) {
+        return (leftheight + 1);
+    } else {
+        return (rightheight + 1);
     }
 }
