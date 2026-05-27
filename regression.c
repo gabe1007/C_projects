@@ -1,8 +1,11 @@
-#define M_PI 3.14159265358979323846
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+
+#define M_PI 3.14159265358979323846
+#define ROWS 1000
+#define COLUMNS 10  
 
 float w_features[9] = {
     0.8,
@@ -22,22 +25,22 @@ float sigmoid(float value);
 float label(float *data, int num_features, float *w);
 void create_dataset(int rows, int columns, float (*data)[columns]);
 void create_weights(float *weights);
+int get_random_index(int n);
+void shuffle_matrix(float (*data)[COLUMNS], int rows, int cols);
 
 int main(void)
 {
-    int rows = 1000;
-    int columns = 10;
 
     srand((unsigned int)time(NULL));
 
-    float (*data)[columns] = malloc(rows * sizeof(*data));
+    float (*data)[COLUMNS] = malloc(ROWS * sizeof(*data));
 
     if (data == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         return 1;
     }
 
-    create_dataset(rows, columns, data);
+    create_dataset(ROWS, COLUMNS, data);
 
     create_weights(weights);
 
@@ -45,9 +48,44 @@ int main(void)
         printf("Weight %d: %f\n", i, weights[i]);
     }
 
+    shuffle_matrix(data, ROWS, COLUMNS);
+
     free(data);
 
     return 0;
+}
+
+int get_random_index(int n) {
+    int limit = RAND_MAX - (RAND_MAX % n);
+    int rnd;
+
+    do {
+        rnd = rand();
+    } while (rnd >= limit);
+
+    return rnd % n;
+}
+
+void shuffle_matrix(float (*data)[COLUMNS], int rows, int cols) {
+    int total_elements = rows * cols;
+    
+    for (int i = total_elements - 1; i > 0; i--) {
+        // Pick a random index from 0 to i
+        int j = get_random_index(i + 1);
+        
+        // Map 1D index i to 2D coordinates
+        int r_i = i / cols;
+        int c_i = i % cols;
+        
+        // Map 1D index j to 2D coordinates
+        int r_j = j / cols;
+        int c_j = j % cols;
+        
+        // In-place swap the elements
+        float temp = data[r_i][c_i];
+        data[r_i][c_i] = data[r_j][c_j];
+        data[r_j][c_j] = temp;
+    }
 }
 
 float sigmoid(float value) {
